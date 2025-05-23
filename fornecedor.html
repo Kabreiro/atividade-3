@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Cadastro de Fornecedor - Atividade 3 Externa</title>
+</head>
+<body>
+  <h1>Cadastro de Fornecedor</h1>
+  <nav>
+    <a href="/index.html">Home</a> |
+    <a href="/fornecedor.html">Cadastro Fornecedor</a> |
+    <a href="/login.html">Login</a> |
+    <a href="/logout.html">Logout</a>
+  </nav>
+
+  <form id="formFornecedor">
+    CNPJ: <input name="cnpj" required><br>
+    Razão Social: <input name="razao" required><br>
+    Nome Fantasia: <input name="fantasia" required><br>
+    Endereço: <input name="endereco" required><br>
+    Cidade: <input name="cidade" required><br>
+    UF: <input name="uf" required><br>
+    CEP: <input name="cep" required><br>
+    Email: <input name="email" type="email" required><br>
+    Telefone: <input name="telefone" required><br>
+    <button type="submit">Cadastrar</button>
+  </form>
+
+  <div id="mensagem"></div>
+
+  <script>
+    const form = document.getElementById('formFornecedor');
+    const mensagemDiv = document.getElementById('mensagem');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => data[key] = value);
+
+      try {
+        const response = await fetch('/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          mensagemDiv.innerHTML = '<ul style="color:red;">' + result.erros.map(err => `<li>${err}</li>`).join('') + '</ul>';
+        } else {
+          mensagemDiv.innerHTML = `<p style="color:green;">${result.mensagem}</p><h3>Fornecedores cadastrados:</h3><ul>` +
+            result.fornecedores.map(f => `<li>${f.razao} (${f.fantasia}) - ${f.cidade}/${f.uf}</li>`).join('') +
+            '</ul>';
+          form.reset();
+        }
+      } catch (err) {
+        mensagemDiv.innerHTML = `<p style="color:red;">Erro na comunicação com o servidor.</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
